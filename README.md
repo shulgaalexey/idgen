@@ -9,7 +9,7 @@ The simplest one is a primitive solution on the base of increment while others a
 
 How to build
 ------------
-g++ -Wall -g -o idgen_test_app idgen_test.cpp
+g++ -Wall -g -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp
 
 How to run
 ----------
