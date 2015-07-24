@@ -24,8 +24,8 @@
  * можно использовать libc, stl и boost.
  * */
 
-#ifndef _IDGEN_H_
-#define _IDGEN_H_
+#ifndef __IDGEN_H__
+#define __IDGEN_H__
 
 #include <climits>
 #include <algorithm>
@@ -33,7 +33,6 @@
 #include "scope_mutex.h"
 
 
-/*-------------------------------------------------------------------------*/
 /**
  * Algorithm of generating of IDs
  */
@@ -67,7 +66,6 @@ bool idgen_basic_algorithm<T>::finished(const T min_id,
 	return (cur_id >= max_id);
 }
 
-/*-------------------------------------------------------------------------*/
 
 /**
  * A very basic and minimalistic ID generator,
@@ -80,6 +78,7 @@ class basic_idgen {
 	public:
 		basic_idgen(T cur_id = 0) : _cur(cur_id) {}
 		virtual ~basic_idgen() {}
+		/* Add copy constructor, operato= */
 	public:
 		/**
 		 * Get the currently available generated ID
@@ -89,7 +88,7 @@ class basic_idgen {
 		/**
 		 * Set the current ID and continue generation from this value
 		 */
-		virtual void set_id(const T cur_id) { _cur = cur_id; }
+		virtual void set_id(const T cur_id = 0) { _cur = cur_id; }
 
 		/**
 		 * Return the incremented current value
@@ -103,13 +102,27 @@ class basic_idgen {
 template <class T>
 class basic_idgen_async : public basic_idgen<T> {
 	protected:
-		mutex_object _m;
+		mutable mutex_object _m;
 	public:
 		basic_idgen_async(T cur_id = 0) : basic_idgen<T>(cur_id) {}
 		virtual ~basic_idgen_async() {}
 	public:
+		virtual T get_id() const;
+		virtual void set_id(const T cur_id = 0);
 		virtual T next_id();
 };
+
+template <class T>
+T basic_idgen_async<T>::get_id() const {
+	scope_mutex sm(_m);
+	return basic_idgen<T>::get_id();
+}
+
+template <class T>
+void basic_idgen_async<T>::set_id(const T cur_id) {
+	scope_mutex sm(_m);
+	basic_idgen<T>::set_id(cur_id);
+}
 
 template <class T>
 T basic_idgen_async<T>::next_id() {
@@ -118,38 +131,43 @@ T basic_idgen_async<T>::next_id() {
 }
 
 
-/*-------------------------------------------------------------------------*/
-
 /**
  * A customizable ID generator.
  * This class is expected to be a "wheelhorse" and be sed mainly in tasks,
  * requiring ID generation
  */
-template <class T, class ALG = idgen_basic_algorithm<T> >
+template <class T = unsigned int,
+	 class ALG = idgen_basic_algorithm<T>,
+	 class SYNC_MUTEX = no_mutex_object>
 class idgen : public basic_idgen<T> {
 	protected:
 		T _min;
 		T _max;
 		bool _round;
 		ALG _alg;
+		mutable SYNC_MUTEX _sync_mutex;
 	public:
 		idgen(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
 		virtual ~idgen() {}
 	public:
-		virtual T next_id();
-
+		virtual T get_id() const;
 		/**
 		 * Set the current ID and continue generation from this value
 		 */
-		virtual void set_id(const T cur_id);
+		virtual void set_id(const T cur_id = 0);
+		virtual T next_id();
 	public:
-		bool is_round() const { return _round; }
-		void set_round(const bool round) { _round = round; }
+		T get_min() const;
+		void set_min(T min_id = 0);
+		T get_max() const;
+		void set_max(T max_id = UINT_MAX);
+		void set_range(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
+		bool is_round() const;
+		void set_round(const bool round);
 };
 
-/*-------------------------------------------------------------------------*/
-	template <class T, class ALG>
-idgen<T, ALG>::idgen(T min_id,
+template <class T, class ALG, class SYNC_MUTEX>
+idgen<T, ALG, SYNC_MUTEX>::idgen(T min_id,
 		T max_id,
 		T cur_id)
 	: basic_idgen<T>(cur_id)
@@ -161,9 +179,17 @@ idgen<T, ALG>::idgen(T min_id,
 	this->_cur = std::max(cur_id, _min);
 }
 
-	template <class T, class ALG>
-T idgen<T, ALG>::next_id()
+template <class T, class ALG, class SYNC_MUTEX>
+T idgen<T, ALG, SYNC_MUTEX>::get_id() const
 {
+	scope_mutex sm(_sync_mutex);
+	return basic_idgen<T>::get_id();
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+T idgen<T, ALG, SYNC_MUTEX>::next_id()
+{
+	scope_mutex sm(_sync_mutex);
 	const T current_id = this->get_id();
 
 	if(!is_round() && _alg.finished(_min, _max, current_id))
@@ -176,21 +202,13 @@ T idgen<T, ALG>::next_id()
 
 	set_id(_alg.get_next_id(_min, _max, current_id));
 
-	/*if(is_round())
-	  set_id(_alg.get_next_id(_min, _max, current_id) % _max);
-	  else
-	  if(!_alg.finished(_min, _max, current_id))
-	  set_id(_alg.get_next_id(_min, _max, current_id));
-	  else {
-	  throw std::out_of_range("idgen::next_id out of range");
-	  }*/
-
 	return this->get_id();
 }
 
-template <class T, class ALG>
-void idgen<T, ALG>::set_id(const T cur)
+template <class T, class ALG, class SYNC_MUTEX>
+void idgen<T, ALG, SYNC_MUTEX>::set_id(const T cur)
 {
+	scope_mutex sm(_sync_mutex);
 	if(is_round())
 		basic_idgen<T>::set_id(cur % _max);
 	else
@@ -206,35 +224,75 @@ void idgen<T, ALG>::set_id(const T cur)
 		}
 }
 
-/*-------------------------------------------------------------------------*/
+template <class T, class ALG, class SYNC_MUTEX>
+T idgen<T, ALG, SYNC_MUTEX>::get_min() const
+{
+	scope_mutex sm(_sync_mutex);
+	return _min;
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+void idgen<T, ALG, SYNC_MUTEX>::set_min(T min_id)
+{
+	scope_mutex sm(_sync_mutex);
+	_min = min_id;
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+T idgen<T, ALG, SYNC_MUTEX>::get_max() const
+{
+	scope_mutex sm(_sync_mutex);
+	return _max;
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+void idgen<T, ALG, SYNC_MUTEX>::set_max(T max_id)
+{
+	scope_mutex sm(_sync_mutex);
+	_max = max_id;
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+void idgen<T, ALG, SYNC_MUTEX>::set_range(T min_id, T max_id, T cur_id)
+{
+	scope_mutex sm(_sync_mutex);
+	set_min(min_id);
+	set_max(max_id);
+	set_id(cur_id);
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+bool idgen<T, ALG, SYNC_MUTEX>::is_round() const
+{
+	scope_mutex sm(_sync_mutex);
+	return _round;
+}
+
+template <class T, class ALG, class SYNC_MUTEX>
+void idgen<T, ALG, SYNC_MUTEX>::set_round(const bool round)
+{
+	scope_mutex sm(_sync_mutex);
+	_round = round;
+}
+
+/*-----------------------------------------------------------------------*/
 /**
- * An asynchronous version of customizable ID generator
+ * Distributed ID generation: there is a group of generators who connect to
+ * ID generation manager
  */
-template <class T, class ALG = idgen_basic_algorithm<T> >
-class idgen_async : public idgen<T, ALG> {
-	protected:
-		mutex_object _m;
-	public:
-		idgen_async(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
-		virtual ~idgen_async() {}
-	public:
-		virtual T next_id();
-};
+/*
+   class idgen_manager {
+   private:
+   list_of_generators;
+   public:
+   register_generator(distributed_idgen *gen);
+   unregister_generator(distributed_idgen *gen);
+   unsigned long long get_id() const;
+   unsigned long long next_id();
+   };
+   */
 
-template <class T, class ALG>
-idgen_async<T, ALG>::idgen_async(T min_id, T max_id, T cur_id)
-	: idgen<T, ALG>(min_id, max_id, cur_id)
-{
-}
-
-template <class T, class ALG>
-T idgen_async<T, ALG>::next_id()
-{
-	scope_mutex sm(_m);
-	return idgen<T, ALG>::next_id();
-}
-
-/*-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 /**
  * The simplest and one of the most useful configuration of ID generators.
  * It provide service of ID generation in range of 0 to the value,

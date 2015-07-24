@@ -5,9 +5,10 @@
 
 #include <iostream>
 #include <assert.h>
+#include <vector>
 
-#ifndef _TEST_CASE_ENV_H_
-#define _TEST_CASE_ENV_H_
+#ifndef __TEST_CASE_ENV_H__
+#define __TEST_CASE_ENV_H__
 
 #ifndef __FUNCTION_NAME__
 	#ifdef WIN32   /* WINDOWS */
@@ -29,6 +30,33 @@ class test_case_env {
 		void set_status(int status) { _status = status; }
 };
 
-#define START_TEST test_case_env _test_case_env(__FUNCTION_NAME__);
+#define START_TEST test_case_env test_case_env(__FUNCTION_NAME__);
 
-#endif /* _TEST_CASE_ENV_H_ */
+typedef void *(*test_case_routine_f)(void *);
+
+class test_job_mgr {
+
+	class test_case_descr {
+		public:
+			test_case_routine_f _test_case;
+			void *_arg;
+			pthread_t _thread;
+		public:
+			test_case_descr(test_case_routine_f test_func, void *arg)
+				: _test_case(test_func)
+				  , _arg(arg)
+				  , _thread(0) {}
+
+	};
+
+	private:
+	vector<test_case_descr> test_cases;
+	public:
+	test_job_mgr() {}
+	virtual ~test_job_mgr() {}
+	public:
+	void add_job(test_case_routine_f test_func, void *arg);
+	void run();
+};
+
+#endif /* __TEST_CASE_ENV_H__ */

@@ -7,8 +7,8 @@
  * exiting the scope
  */
 
-#ifndef _SCOPE_MUTEX_H_
-#define _SCOPE_MUTEX_H_
+#ifndef __SCOPE_MUTEX_H__
+#define __SCOPE_MUTEX_H__
 
 #include <pthread.h>
 
@@ -16,7 +16,7 @@
  * The wrapper class over libc mutex structure
  */
 class mutex_object {
-	private:
+	protected:
 		pthread_mutex_t _m;
 	public:
 		mutex_object();
@@ -26,16 +26,24 @@ class mutex_object {
 };
 
 
-/*-------------------------------------------------------------------------*/
+/**
+ * The class of fake mutex
+ * It is useful when we don't need a synchronization of threads
+ */
+class no_mutex_object {
+	public:
+		operator pthread_mutex_t *() { return NULL; }
+};
 
 /**
  * Thescope mutex class
  */
 class scope_mutex {
-	pthread_mutex_t *_m;
+	protected:
+		pthread_mutex_t *_m;
 	public:
-	scope_mutex(pthread_mutex_t *m);
-	~scope_mutex();
+		scope_mutex(pthread_mutex_t *m);
+		~scope_mutex();
 };
 
-#endif /* _SCOPE_MUTEX_H_ */
+#endif /* __SCOPE_MUTEX_H__ */

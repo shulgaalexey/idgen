@@ -21,10 +21,8 @@ mutex_object::operator pthread_mutex_t *()
 	return &_m;
 }
 
-/*-------------------------------------------------------------------------*/
-
-	scope_mutex::scope_mutex(pthread_mutex_t *m)
-: _m(m)
+scope_mutex::scope_mutex(pthread_mutex_t *m)
+	: _m(m)
 {
 	if(_m)
 		pthread_mutex_lock(_m);

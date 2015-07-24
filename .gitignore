@@ -28,4 +28,5 @@
 *.app
 
 # Test app
+idgen_test_app
 test
