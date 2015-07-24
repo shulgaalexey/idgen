@@ -9,20 +9,13 @@
  * or even provide an unpredicted service of unique ID generation)
  * 3. Get min/max/cur
  * 4. Round robin or single iteration of ids (id = ++id % N)
- * 5. Release and reuse ids (it may be interesting for entity list management);
+ * 5. Distributed ID generation system: De-couple generator, algorithm, id pool
+   * Register an ID generator in the remote Manager
+ * 6. Release and reuse ids (it may be interesting for entity list management);
  * Get used/released ids (leverage a hash table for this)
- * 6. Add names for generators
- * 7. De-couple generator, algorithm, id pool
+ * 7. Add names for generators
  */
 
-/*
- * Необходимо реализовать класс(ы) для генерирования идентификаторов.
- * Идентификаторы должны быть последовательными целыми числами (например, 3, 4, 5
- * и т.п.). Другие свойства генератора нужно придумать самому на основе того,
- * что может понадобится пользователям генератора. Код
- * должен быть написан на C++ используя любой официальный стандарт. Из библиотек
- * можно использовать libc, stl и boost.
- * */
 
 #ifndef __IDGEN_H__
 #define __IDGEN_H__
