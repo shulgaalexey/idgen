@@ -8,8 +8,8 @@ This is a library with a family of ID generation service classes, applicable in
 a wide range of simple and complex tasks and conditions.
 The simplest class of generators is a primitive solution on the base of
 increment of unsigned integer, while other classes allow to customize the
-algorithm of ID generation, the ranges of IDs, use generators in the infinite
-loops, guarantee the tread safety etc.
+algorithm of ID generation, set-up the ranges of IDs, use generators in the infinite
+loops, provide the tread safety etc.
 
 Class View
 ----------
@@ -21,7 +21,7 @@ How to use
 ----------
 To use the ID generation, include the header file:
 
-#include "idgen.h"
+	#include "idgen.h"
 
 All ID generators provide a basic interface, comprising three methods:
  * get_id() to get the currently generated ID;
@@ -30,7 +30,7 @@ All ID generators provide a basic interface, comprising three methods:
  the next IDs.
 
 For the simplest case, when You need a regular non-negative integer ID
-generation, it is recommended to use basic_idgen class, as following.
+generation, it is recommended to use single_idgen class, as following.
 
 	/* Issue an instance of ID generator */
 	simple_idgen g;
@@ -39,7 +39,7 @@ generation, it is recommended to use basic_idgen class, as following.
 	int id = g.get_id();
 	assert(id == 0);
 
-	/* Get the next ID */
+	/* Get the next IDs */
 	assert(g.next_id() == 1);
 	assert(g.next_id() == 2);
 	assert(g.next_id() == 3);
@@ -55,13 +55,13 @@ Note that the type of IDs in this class is set to unsigned int.
 
 For the cases when the thread safety is required, use simple_idgen_async.
 
-When it is required to configure the ID generator with specified type of IDs,
+When it is required to configure the ID generator with the specified type of IDs,
 to limit the ID value range, as well as set up the first ID value, or assign a
 specific algorithm of ID generation, it is recommended to use class idgen.
 When it is required to generate IDs in an infinite cycle, You can set the
 "round-robin" generation mode ON, so when the generator reaches the end of ID
 value range, it starts again from the minimal ID value. If the "round-robin"
-mode is of, the std::out_of_range exception will be thrown.
+mode is off, the std::out_of_range exception will be thrown.
 
 Note, that by default, the parameters of generator are assigned as following:
  * ID type: unsigned int
@@ -71,7 +71,7 @@ Note, that by default, the parameters of generator are assigned as following:
  * "round-robin" mode: ON
 
 The type of IDs and the algorithm of ID generation can be assigned as
-parameters of idgen class while issuing instances of generators.
+parameters of idgen class constructor while issuing instances of generator.
 You can set the range of IDs and the first ID value in parameters of idgen
 constructors. Another way to set the first ID value is the set_id() method.
 To turn ON or OFF the :round-robin" mode, use set_round() method.
@@ -93,7 +93,7 @@ Example
 		/* Set the starting value of ID on the higher limit of ID range */
 		g.set_id(20);
 
-		/* Request the ID out of range */
+		/* Request the ID out of range, and ... */
 		g.next_id();
 	} catch(exception& e) {
 		/* Hooray, exception! */
@@ -127,4 +127,5 @@ TODO
  * Update docummentation
  * Consider creating C API
  * Support mutex_object for WIN OS
+ * Check source coverage by tests (gcov)
 
