@@ -3,13 +3,19 @@ ID Generation Service Library
 ===================================
 
 Overview
-------
+--------
 This is a library with a family of ID generation service classes, applicable in
 a wide range of simple and complex tasks and conditions.
 The simplest class of generators is a primitive solution on the base of
 increment of unsigned integer, while other classes allow to customize the
 algorithm of ID generation, the ranges of IDs, use generators in the infinite
 loops, guarantee the tread safety etc.
+
+Class View
+----------
+<img src="https://github.com/shulgaalexey/idgen/blob/master/idgen.png" alt="ID generation class view" style="width:250px"/>
+
+
 
 How to use
 ----------
@@ -51,8 +57,7 @@ For the cases when the thread safety is required, use simple_idgen_async.
 
 When it is required to configure the ID generator with specified type of IDs,
 to limit the ID value range, as well as set up the first ID value, or assign a
-specific algorithm of ID generation, it is recommended to use template classes
-idgen and idgen_async.
+specific algorithm of ID generation, it is recommended to use class idgen.
 When it is required to generate IDs in an infinite cycle, You can set the
 "round-robin" generation mode ON, so when the generator reaches the end of ID
 value range, it starts again from the minimal ID value. If the "round-robin"
@@ -66,11 +71,9 @@ Note, that by default, the parameters of generator are assigned as following:
  * "round-robin" mode: ON
 
 The type of IDs and the algorithm of ID generation can be assigned as
-parameters of idgen and idgen_async classes while issuing instances of
-generators.
-You can set the range of IDs and the first ID value in parameters of idgen or
-idgen_async constructors. Another way to set the first ID value is the set_id()
-method.
+parameters of idgen class while issuing instances of generators.
+You can set the range of IDs and the first ID value in parameters of idgen
+constructors. Another way to set the first ID value is the set_id() method.
 To turn ON or OFF the :round-robin" mode, use set_round() method.
 
 Example
