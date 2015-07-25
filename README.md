@@ -32,7 +32,7 @@ All ID generators provide a basic interface, comprising three methods:
 For the simplest case, when You need a regular non-negative integer ID
 generation, it is recommended to use single_idgen class, as following.
 
-	/* Issue an instance of ID generator */
+	/* Issue an instance of IDs generator */
 	simple_idgen g;
 
 	/* Get the firstly generated ID */
@@ -51,7 +51,7 @@ generation, it is recommended to use single_idgen class, as following.
 	assert(g.get_id() == 13);
 	assert(g.next_id() == 14);
 
-Note that the type of IDs in this class is set to unsigned int.
+Note, that the type of IDs in this class is set to unsigned int.
 
 For the cases when the thread safety is required, use simple_idgen_async.
 
@@ -106,9 +106,11 @@ Example
 How to build
 ------------
  * Debug
+
 g++ -Wall -g -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
 
  * Release
+
 g++ -Wall -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
 
 How to run
