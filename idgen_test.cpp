@@ -41,10 +41,11 @@ void *use_simple_idgen_async(void *arg)
 {
 	if(!arg)
 		return NULL;
-	for(int i = 0; i < 1000; i ++) {
+	for(int i = 0; i < 10000; i ++) {
 		simple_idgen_async *g = (simple_idgen_async *)arg;
-		/* int id = */
+		/*int id =*/
 		g->next_id();
+		/*cout << pthread_self() << ":\t" << g << ",\t" << i << ":\t" << id << endl;*/
 	}
 	return NULL;
 }
