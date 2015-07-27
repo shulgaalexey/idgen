@@ -18,6 +18,7 @@
 class mutex_object {
 	protected:
 		pthread_mutex_t _m;
+		pthread_mutexattr_t _attr;
 	public:
 		mutex_object();
 		~mutex_object();
@@ -44,6 +45,8 @@ class scope_mutex {
 	public:
 		scope_mutex(pthread_mutex_t *m);
 		~scope_mutex();
+	public:
+		void halt();
 };
 
 #endif /* __SCOPE_MUTEX_H__ */

@@ -34,14 +34,14 @@ void test_simple_gen_p(void)
 void test_simple_gen_n(void)
 {
 	START_TEST;
+	/* TODO: */
 }
-
 
 void *use_simple_idgen_async(void *arg)
 {
 	if(!arg)
 		return NULL;
-	for(int i = 0; i < 10000; i ++) {
+	for(int i = 0; i < 5; i ++) {
 		simple_idgen_async *g = (simple_idgen_async *)arg;
 		/*int id =*/
 		g->next_id();
@@ -52,14 +52,14 @@ void *use_simple_idgen_async(void *arg)
 
 void test_simple_gen_async_p(void)
 {
+	return;
 	START_TEST;
-
 
 	simple_idgen_async g1;
 	simple_idgen_async g2;
 
 	test_job_mgr mgr;
-	for(int i = 0; i < 10; i ++) {
+	for(int i = 0; i < 3; i ++) {
 		mgr.add_job(use_simple_idgen_async, &g1);
 		mgr.add_job(use_simple_idgen_async, &g2);
 	}
@@ -69,6 +69,7 @@ void test_simple_gen_async_p(void)
 void test_simple_gen_async_n(void)
 {
 	START_TEST;
+	/* TODO: */
 }
 
 void test_custom_gen_p(void)
@@ -76,7 +77,7 @@ void test_custom_gen_p(void)
 	START_TEST;
 
 	/* Issue an instance of ID generator */
-	idgen<int> g(10, 20, 15);
+	idgen<unsigned int> g(10, 20, 15);
 
 
 	/* Get a couple of IDs */
@@ -106,18 +107,42 @@ void test_custom_gen_p(void)
 void test_custom_gen_n(void)
 {
 	START_TEST;
+	/* TODO: */
+}
+
+void *use_idgen_async(void *arg)
+{
+	if(!arg)
+		return NULL;
+	for(int i = 0; i < 3; i ++) {
+		idgen<unsigned int, idgen_basic_algorithm<unsigned int>, mutex_object> *g =
+			(idgen<unsigned int, idgen_basic_algorithm<unsigned int>, mutex_object> *)arg;
+		/*int id =*/
+		g->next_id();
+		/*cout << pthread_self() << ":\t" << g << ",\t" << i << ":\t" << id << endl;*/
+	}
+	return NULL;
 }
 
 void test_custom_gen_async_p(void)
 {
 	START_TEST;
 
+	idgen<unsigned int, idgen_basic_algorithm<unsigned int>, mutex_object> g1;
+	idgen<unsigned int, idgen_basic_algorithm<unsigned int>, mutex_object> g2;
 
+	test_job_mgr mgr;
+	for(int i = 0; i < 5; i ++) {
+		mgr.add_job(use_idgen_async, &g1);
+		mgr.add_job(use_idgen_async, &g2);
+	}
+	mgr.run();
 }
 
 void test_custom_gen_async_n(void)
 {
 	START_TEST;
+	/* TODO: */
 }
 
 int main(void)

@@ -79,7 +79,7 @@ To turn ON or OFF the :round-robin" mode, use set_round() method.
 Example
 
 	/* Issue an instance of ID generator */
-	idgen<int> g(10, 20, 15);
+	idgen<unsigned int> g(10, 20, 15);
 
 	/* Get a couple of IDs */
 	assert(g.get_id() == 15);

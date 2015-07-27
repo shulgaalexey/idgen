@@ -3,7 +3,7 @@
  * id generator class
  *
  * Basic requirements:
- * 0. Template type of id (unsigned char, int, long)
+ * 0. Template type of ID (unsigned char, int, long)
  * 1. Sync/async
  * 2. Different algs (move to next id every second,
  * or even provide an unpredicted service of unique ID generation)
@@ -166,7 +166,7 @@ idgen<T, ALG, SYNC_MUTEX>::idgen(T min_id,
 	: basic_idgen<T>(cur_id)
 	, _min(min_id)
 	, _max(max_id)
-	  , _round(true)
+	, _round(true)
 {
 	/* Check if _max is bigger than _min */
 	this->_cur = std::max(cur_id, _min);
@@ -183,19 +183,21 @@ template <class T, class ALG, class SYNC_MUTEX>
 T idgen<T, ALG, SYNC_MUTEX>::next_id()
 {
 	scope_mutex sm(_sync_mutex);
-	const T current_id = this->get_id();
+	const T current_id = get_id();
 
-	if(!is_round() && _alg.finished(_min, _max, current_id))
+	if(!is_round() && _alg.finished(_min, _max, current_id)) {
+		sm.halt();
 		/*
 		 * Throw out-of-range exception when
 		 * "no-round-robin" algorithm can no longer
 		 * generate new IDs
 		 */
 		throw std::out_of_range("idgen::next_id out of range");
+	}
 
 	set_id(_alg.get_next_id(_min, _max, current_id));
 
-	return this->get_id();
+	return get_id();
 }
 
 template <class T, class ALG, class SYNC_MUTEX>
