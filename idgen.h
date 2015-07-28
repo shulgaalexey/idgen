@@ -10,7 +10,7 @@
  * 3. Get min/max/cur
  * 4. Round robin or single iteration of ids (id = ++id % N)
  * 5. Distributed ID generation system: De-couple generator, algorithm, id pool
-   * Register an ID generator in the remote Manager
+ * Register an ID generator in the remote Manager
  * 6. Release and reuse ids (it may be interesting for entity list management);
  * Get used/released ids (leverage a hash table for this)
  * 7. Add names for generators
@@ -132,41 +132,47 @@ T basic_idgen_async<T>::next_id() {
 template <class T = unsigned int,
 	 class ALG = idgen_basic_algorithm<T>,
 	 class SYNC_MUTEX = no_mutex_object>
-class idgen : public basic_idgen<T> {
-	protected:
-		T _min;
-		T _max;
-		bool _round;
-		ALG _alg;
-		mutable SYNC_MUTEX _sync_mutex;
-	public:
-		idgen(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
-		virtual ~idgen() {}
-	public:
-		virtual T get_id() const;
-		/**
-		 * Set the current ID and continue generation from this value
-		 */
-		virtual void set_id(const T cur_id = 0);
-		virtual T next_id();
-	public:
-		T get_min() const;
-		void set_min(T min_id = 0);
-		T get_max() const;
-		void set_max(T max_id = UINT_MAX);
-		void set_range(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
-		bool is_round() const;
-		void set_round(const bool round);
-};
+	 class idgen : public basic_idgen<T> {
+		 protected:
+			 T _min;
+			 T _max;
+			 bool _round;
+			 ALG _alg;
+			 mutable SYNC_MUTEX _sync_mutex;
+		 public:
+			 /* TODO: define prediction functions with implementations for
+			  * different types:
+			  *  static T __predict_min_id<T>()
+			  *  static T __predict_max_id<T>()
+			  *  static T __predict_cur_id<T>()
+			  */
+			 idgen(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
+			 virtual ~idgen() {}
+		 public:
+			 virtual T get_id() const;
+			 /**
+			  * Set the current ID and continue generation from this value
+			  */
+			 virtual void set_id(const T cur_id = 0);
+			 virtual T next_id();
+		 public:
+			 T get_min() const;
+			 void set_min(T min_id = 0);
+			 T get_max() const;
+			 void set_max(T max_id = UINT_MAX);
+			 void set_range(T min_id = 0, T max_id = UINT_MAX, T cur_id = 0);
+			 bool is_round() const;
+			 void set_round(const bool round);
+	 };
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 idgen<T, ALG, SYNC_MUTEX>::idgen(T min_id,
 		T max_id,
 		T cur_id)
 	: basic_idgen<T>(cur_id)
 	, _min(min_id)
 	, _max(max_id)
-	, _round(true)
+	  , _round(true)
 {
 	/* Check if _max is bigger than _min */
 	this->_cur = std::max(cur_id, _min);
@@ -179,7 +185,7 @@ T idgen<T, ALG, SYNC_MUTEX>::get_id() const
 	return basic_idgen<T>::get_id();
 }
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 T idgen<T, ALG, SYNC_MUTEX>::next_id()
 {
 	scope_mutex sm(_sync_mutex);
@@ -200,7 +206,7 @@ T idgen<T, ALG, SYNC_MUTEX>::next_id()
 	return get_id();
 }
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 void idgen<T, ALG, SYNC_MUTEX>::set_id(const T cur)
 {
 	scope_mutex sm(_sync_mutex);
@@ -226,7 +232,7 @@ T idgen<T, ALG, SYNC_MUTEX>::get_min() const
 	return _min;
 }
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 void idgen<T, ALG, SYNC_MUTEX>::set_min(T min_id)
 {
 	scope_mutex sm(_sync_mutex);
@@ -240,14 +246,14 @@ T idgen<T, ALG, SYNC_MUTEX>::get_max() const
 	return _max;
 }
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 void idgen<T, ALG, SYNC_MUTEX>::set_max(T max_id)
 {
 	scope_mutex sm(_sync_mutex);
 	_max = max_id;
 }
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 void idgen<T, ALG, SYNC_MUTEX>::set_range(T min_id, T max_id, T cur_id)
 {
 	scope_mutex sm(_sync_mutex);
@@ -263,7 +269,7 @@ bool idgen<T, ALG, SYNC_MUTEX>::is_round() const
 	return _round;
 }
 
-template <class T, class ALG, class SYNC_MUTEX>
+	template <class T, class ALG, class SYNC_MUTEX>
 void idgen<T, ALG, SYNC_MUTEX>::set_round(const bool round)
 {
 	scope_mutex sm(_sync_mutex);
