@@ -106,18 +106,18 @@ Example
 How to build
 ------------
 Debug
-	g++ -Wall -g -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
+ * g++ -Wall -g -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
 
 
 
 Test Code Coverage
-	g++ --coverage -g -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
-	./idgen_test_app
-	gcov idgen_test.cpp
+ * g++ --coverage -g -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
+ * ./idgen_test_app
+ * gcov idgen_test.cpp
 
 
 Release
-	g++ -Wall -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
+ * g++ -Wall -o idgen_test_app scope_mutex.cpp test_case_env.cpp idgen_test.cpp -lpthread
 
 
 How to run
