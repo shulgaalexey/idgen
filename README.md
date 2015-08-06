@@ -130,11 +130,8 @@ Issues
 
 TODO
 ----
- * Design classes
- * Design test cases
- * Update comments
- * Update docummentation
+ * Design more test cases
+ * Check source coverage by tests (gcov)
  * Consider creating C API
  * Support mutex_object for WIN OS
- * Check source coverage by tests (gcov)
-
+ 
